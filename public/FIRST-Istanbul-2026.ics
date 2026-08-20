@@ -1,0 +1,16 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Dar Aldawa//FIRST Istanbul 2026//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:first-istanbul-2026@daraldawa.com
+DTSTAMP:20260820T060000Z
+DTSTART:20260915T083000Z
+DTEND:20260918T153000Z
+SUMMARY:FIRST — Steps to Effective Treatment
+LOCATION:Hilton Istanbul Bomonti Hotel & Conference Center\, Istanbul
+DESCRIPTION:Dar Aldawa scientific symposium and Istanbul experience.
+STATUS:CONFIRMED
+END:VEVENT
+END:VCALENDAR

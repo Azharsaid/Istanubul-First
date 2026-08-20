@@ -1,0 +1,10 @@
+{
+  "name": "FIRST Istanbul Experience",
+  "short_name": "FIRST 2026",
+  "description": "Dar Aldawa scientific symposium and Istanbul experience",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#061d2e",
+  "theme_color": "#05a99d",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
