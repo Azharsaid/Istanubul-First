@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import type { Lang } from "./event-data";
 
+const asset = (path: string) => `${typeof window !== "undefined" && window.location.pathname.startsWith("/Istanubul-First") ? "/Istanubul-First" : ""}${path}`;
+
 const safeImage = (url: string) => `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=1200&h=800&fit=cover&output=webp`;
 
 const restaurants = [
@@ -79,10 +81,20 @@ export function IstanbulSection({ lang }: { lang: Lang }) {
   const [forecast, setForecast] = useState<{dates:string[]; max:number[]; min:number[]; codes:number[]} | null>(null);
   const [currentTemp, setCurrentTemp] = useState<number | null>(null);
   const [rate, setRate] = useState<number | null>(null);
+  const [updated, setUpdated] = useState<string | null>(null);
+  const [weatherState, setWeatherState] = useState<"loading"|"live"|"cached"|"offline">("loading");
+  const [currencyState, setCurrencyState] = useState<"loading"|"live"|"cached"|"offline">("loading");
+  const [jod, setJod] = useState("1");
   useEffect(() => {
+    try {
+      const weatherCache = JSON.parse(localStorage.getItem("first-weather-cache") || "null");
+      if (weatherCache) { setCurrentTemp(weatherCache.currentTemp); setForecast(weatherCache.forecast); setUpdated(weatherCache.updated); setWeatherState("cached"); }
+      const rateCache = JSON.parse(localStorage.getItem("first-rate-cache") || "null");
+      if (rateCache) { setRate(rateCache.rate); setUpdated(x => x || rateCache.updated); setCurrencyState("cached"); }
+    } catch { /* optional cache */ }
     fetch("https://api.open-meteo.com/v1/forecast?latitude=41.0082&longitude=28.9784&current=temperature_2m&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=Europe%2FIstanbul&forecast_days=7")
-      .then(r=>r.json()).then(data=>{setCurrentTemp(data.current?.temperature_2m ?? null);setForecast({dates:data.daily?.time??[],max:data.daily?.temperature_2m_max??[],min:data.daily?.temperature_2m_min??[],codes:data.daily?.weather_code??[]})}).catch(()=>undefined);
-    fetch("https://open.er-api.com/v6/latest/JOD").then(r=>r.json()).then(data=>setRate(data.rates?.TRY ?? null)).catch(()=>undefined);
+      .then(r=>{if(!r.ok)throw new Error();return r.json()}).then(data=>{const value={dates:data.daily?.time??[],max:data.daily?.temperature_2m_max??[],min:data.daily?.temperature_2m_min??[],codes:data.daily?.weather_code??[]},stamp=new Date().toISOString();setCurrentTemp(data.current?.temperature_2m ?? null);setForecast(value);setUpdated(stamp);setWeatherState("live");localStorage.setItem("first-weather-cache",JSON.stringify({currentTemp:data.current?.temperature_2m??null,forecast:value,updated:stamp}))}).catch(()=>setWeatherState(s=>s==="cached"?s:"offline"));
+    fetch("https://open.er-api.com/v6/latest/JOD").then(r=>{if(!r.ok)throw new Error();return r.json()}).then(data=>{const value=data.rates?.TRY;if(!value)throw new Error();const stamp=new Date().toISOString();setRate(value);setUpdated(x=>x||stamp);setCurrencyState("live");localStorage.setItem("first-rate-cache",JSON.stringify({rate:value,updated:stamp}))}).catch(()=>setCurrencyState(s=>s==="cached"?s:"offline"));
   }, []);
   const weatherIcon=(code:number)=>code===0?"☀":code<4?"⛅":code<70?"☂":"❄";
   return (
@@ -97,7 +109,7 @@ export function IstanbulSection({ lang }: { lang: Lang }) {
       </div>
       <div className="istanbul-story-grid">
         <article className="istanbul-story istanbul-story--wide">
-          <img src="/assets/hero-istanbul.png" alt="Istanbul Bosphorus at dusk" />
+          <img src={asset("/assets/hero-istanbul.png")} alt="Istanbul Bosphorus at dusk" />
           <div><span>01 · BOSPHORUS</span><h3>{ar ? "الممر الذي يصنع هوية المدينة" : "The waterway that shapes the city"}</h3><p>{ar ? "البوسفور يفصل أوروبا عن آسيا، ويجمع تاريخ إسطنبول وحياتها الحديثة في مشهد واحد." : "The Bosphorus separates Europe and Asia while bringing Istanbul’s history and modern rhythm into one view."}</p></div>
         </article>
         <article className="istanbul-story">
@@ -111,12 +123,12 @@ export function IstanbulSection({ lang }: { lang: Lang }) {
       </div>
       <div className="istanbul-quick-grid">
         <article><span>⌚</span><small>{ar ? "التوقيت" : "TIME"}</small><b>UTC+3</b><p>{ar ? "نفس توقيت عمّان خلال أيام الرحلة." : "The same as Amman during the event."}</p></article>
-        <article className="live-tile"><span>₺</span><small>{ar ? "العملة · مباشر" : "LIVE CURRENCY"}</small><b>{rate ? `1 JOD = ${rate.toFixed(2)} TRY` : "…"}</b><p>{ar ? "سعر حي للمساعدة في حساب المصروفات؛ قد يختلف سعر البنك." : "A live reference rate; your bank’s rate may vary."}</p></article>
-        <article className="live-tile"><span>☀</span><small>{ar ? "الطقس · مباشر" : "LIVE WEATHER"}</small><b>{currentTemp!==null ? `${Math.round(currentTemp)}°C` : "…"}</b><p>{ar ? "درجة الحرارة الحالية في إسطنبول." : "Current temperature in central Istanbul."}</p></article>
+        <article className="live-tile currency-tile"><span>₺</span><small>{ar ? "العملة" : "JOD → TRY"} · {currencyState.toUpperCase()}</small><b>{rate ? `${jod || 0} JOD = ${(Number(jod || 0)*rate).toFixed(2)} TRY` : ar ? "السعر غير متاح" : "Rate unavailable"}</b><input aria-label="Jordanian dinars" inputMode="decimal" value={jod} onChange={e=>setJod(e.target.value.replace(/[^0-9.]/g,""))}/><p>{ar ? "سعر إرشادي؛ قد يختلف سعر البنك." : "Indicative reference rate; your bank’s rate may vary."}</p></article>
+        <article className="live-tile"><span>☀</span><small>{ar ? "الطقس" : "WEATHER"} · {weatherState.toUpperCase()}</small><b>{currentTemp!==null ? `${Math.round(currentTemp)}°C` : ar ? "غير متاح" : "Unavailable"}</b><p>{currentTemp!==null ? (currentTemp<15?(ar?"طبقة دافئة خفيفة مناسبة.":"A light warm layer is useful."):currentTemp>27?(ar?"ملابس خفيفة وماء كافٍ.":"Choose light clothing and stay hydrated."):(ar?"طقس معتدل؛ احمل طبقة خفيفة للمساء.":"Mild conditions; carry a light evening layer.")) : (ar?"سيظهر آخر تحديث محفوظ عند توفره.":"The last cached update will appear when available.")}</p></article>
         <article><span>112</span><small>{ar ? "الطوارئ" : "EMERGENCY"}</small><b>24 / 7</b><p>{ar ? "رقم الطوارئ الموحد في تركيا." : "Türkiye’s unified emergency number."}</p></article>
       </div>
       <div className="live-istanbul">
-        <div className="live-heading"><span>LIVE · ISTANBUL</span><h3>{ar ? "توقعات السبعة أيام" : "Your 7-day outlook"}</h3><p>{ar ? "تتحدث تلقائياً لتساعدك في اختيار ملابس اليوم." : "Automatically refreshed to help you dress for the day."}</p></div>
+        <div className="live-heading"><span>{weatherState.toUpperCase()} · ISTANBUL</span><h3>{ar ? "توقعات السبعة أيام" : "Your 7-day outlook"}</h3><p>{updated ? `${ar?"آخر تحديث":"Last updated"}: ${new Intl.DateTimeFormat(ar?"ar-JO":"en-GB",{dateStyle:"medium",timeStyle:"short"}).format(new Date(updated))}` : (ar?"بانتظار البيانات؛ لن تترك البطاقة فارغة.":"Waiting for data; cached guidance remains available.")}</p></div>
         <div className="forecast-strip">{forecast ? forecast.dates.map((date,i)=><article key={date}><small>{new Intl.DateTimeFormat(ar?"ar-JO":"en-GB",{weekday:"short"}).format(new Date(`${date}T12:00:00`))}</small><span>{weatherIcon(forecast.codes[i])}</span><b>{Math.round(forecast.max[i])}°</b><em>{Math.round(forecast.min[i])}°</em></article>) : Array.from({length:7},(_,i)=><article className="forecast-loading" key={i}/>)}</div>
       </div>
       <div className="istanbul-guide">
@@ -143,7 +155,7 @@ export function RestaurantsSection({ lang }: { lang: Lang }) {
       <div className="restaurant-grid">
         {restaurants.map((r, i) => (
           <article className="restaurant-card" key={r.name}>
-            <div className="restaurant-image"><img src={r.image} alt={r.name} loading="lazy" onError={e=>{e.currentTarget.onerror=null;e.currentTarget.src="/assets/hero-istanbul.png"}} /><span>0{i + 1}</span><div className="rating"><b>★ {r.rating}</b><small>{r.reviews}</small></div></div>
+            <div className="restaurant-image"><img src={r.image} alt={r.name} loading="lazy" onError={e=>{e.currentTarget.onerror=null;e.currentTarget.src=asset("/assets/hero-istanbul.png")}} /><span>0{i + 1}</span><div className="rating"><b>★ {r.rating}</b><small>{r.reviews}</small></div></div>
             <div className="restaurant-copy"><small>{r.time}</small><h3>{r.name}</h3><em>{r.type[lang]}</em><p>{r.experience[lang]}</p><div><a href={r.map} target="_blank" rel="noreferrer">{ar ? "افتح الخريطة" : "Open map"} ↗</a><a href={r.source} target="_blank" rel="noreferrer">Tripadvisor ↗</a></div></div>
           </article>
         ))}
