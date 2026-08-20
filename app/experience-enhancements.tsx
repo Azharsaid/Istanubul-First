@@ -101,28 +101,6 @@ export function IstanbulSection({ lang }: { lang: Lang }) {
   const weatherIcon=(code:number)=>code===0?"☀":code<4?"⛅":code<70?"☂":"❄";
   return (
     <section id="istanbul" className="istanbul-page">
-      <div className="istanbul-hero">
-        <div className="istanbul-hero-copy">
-          <span>41°01′N · 28°58′E</span>
-          <h2>{ar ? "إسطنبول معنا غير" : "Istanbul, Our Way"}</h2>
-          <p>{ar ? "مدينة بين قارتين، نعيشها خلال أربعة أيام من العلم والثقافة والضيافة الراقية." : "A city between two continents—experienced through four days of science, culture and considered hospitality."}</p>
-        </div>
-        <div className="continent-stamp"><b>EUROPE</b><i>↔</i><b>ASIA</b><small>BOSPHORUS</small></div>
-      </div>
-      <div className="istanbul-story-grid">
-        <article className="istanbul-story istanbul-story--wide">
-          <img src={asset("/assets/hero-istanbul.png")} alt="Istanbul Bosphorus at dusk" />
-          <div><span>01 · BOSPHORUS</span><h3>{ar ? "الممر الذي يصنع هوية المدينة" : "The waterway that shapes the city"}</h3><p>{ar ? "البوسفور يفصل أوروبا عن آسيا، ويجمع تاريخ إسطنبول وحياتها الحديثة في مشهد واحد." : "The Bosphorus separates Europe and Asia while bringing Istanbul’s history and modern rhythm into one view."}</p></div>
-        </article>
-        <article className="istanbul-story">
-          <img src="https://traveleurope.ro/wp-content/uploads/2015/09/Galata-Tower-09.jpg" alt="Galata Tower" />
-          <div><span>02 · GALATA</span><h3>{ar ? "إطلالة على طبقات التاريخ" : "A view across layers of history"}</h3></div>
-        </article>
-        <article className="istanbul-story">
-          <img src="https://cdn12.picryl.com/photo/2016/12/31/istanbul-turkey-mosque-architecture-buildings-d8268b-1024.jpg" alt="Blue Mosque" />
-          <div><span>03 · SULTANAHMET</span><h3>{ar ? "روعة العمارة العثمانية" : "Ottoman architecture at its finest"}</h3></div>
-        </article>
-      </div>
       <div className="istanbul-quick-grid">
         <article><span>⌚</span><small>{ar ? "التوقيت" : "TIME"}</small><b>UTC+3</b><p>{ar ? "نفس توقيت عمّان خلال أيام الرحلة." : "The same as Amman during the event."}</p></article>
         <article className="live-tile currency-tile"><span>₺</span><small>{ar ? "حوّل إلى الليرة التركية" : "CONVERT TO TRY"} · {currencyState.toUpperCase()}</small><div className="currency-choice" role="group" aria-label={ar?"اختر العملة":"Choose currency"}><button className={sourceCurrency==="JOD"?"active":""} onClick={()=>setSourceCurrency("JOD")}>JOD</button><button className={sourceCurrency==="USD"?"active":""} onClick={()=>setSourceCurrency("USD")}>USD</button></div><b>{(sourceCurrency==="JOD"?rate:usdRate) ? `${amount || 0} ${sourceCurrency} = ${(Number(amount || 0)*(sourceCurrency==="JOD"?rate!:usdRate!)).toFixed(2)} TRY` : ar ? "السعر غير متاح" : "Rate unavailable"}</b><label><span>{sourceCurrency}</span><input aria-label={sourceCurrency==="JOD"?"Jordanian dinars":"US dollars"} inputMode="decimal" value={amount} onChange={e=>setAmount(e.target.value.replace(/[^0-9.]/g,""))}/></label><p>{ar ? "سعر إرشادي؛ قد يختلف سعر البنك." : "Indicative reference rate; your bank’s rate may vary."}</p></article>
@@ -132,17 +110,6 @@ export function IstanbulSection({ lang }: { lang: Lang }) {
       <div className="live-istanbul">
         <div className="live-heading"><span>{weatherState.toUpperCase()} · ISTANBUL</span><h3>{ar ? "توقعات السبعة أيام" : "Your 7-day outlook"}</h3><p>{updated ? `${ar?"آخر تحديث":"Last updated"}: ${new Intl.DateTimeFormat(ar?"ar-JO":"en-GB",{dateStyle:"medium",timeStyle:"short"}).format(new Date(updated))}` : (ar?"بانتظار البيانات؛ لن تترك البطاقة فارغة.":"Waiting for data; cached guidance remains available.")}</p></div>
         <div className="forecast-strip">{forecast ? forecast.dates.map((date,i)=><article key={date}><small>{new Intl.DateTimeFormat(ar?"ar-JO":"en-GB",{weekday:"short"}).format(new Date(`${date}T12:00:00`))}</small><span>{weatherIcon(forecast.codes[i])}</span><b>{Math.round(forecast.max[i])}°</b><em>{Math.round(forecast.min[i])}°</em></article>) : Array.from({length:7},(_,i)=><article className="forecast-loading" key={i}/>)}</div>
-      </div>
-      <div className="istanbul-guide">
-        <div className="guide-heading"><span>EXPLORE SMARTER</span><h3>{ar ? "دليل صغير لمدينة كبيرة" : "A small guide to a very big city"}</h3></div>
-        <div className="guide-grid">
-          <article><span>01</span><h4>{ar?"التنقل":"Getting around"}</h4><p>{ar?"استخدم Istanbulkart للمترو والترام والعبّارات. تجنب ساعات الذروة قدر الإمكان، واترك وقتاً إضافياً بسبب الازدحام.":"Use an Istanbulkart for metro, tram and ferries. Avoid peak hours where possible and allow extra time for traffic."}</p></article>
-          <article><span>02</span><h4>{ar?"الأحياء":"Neighbourhoods"}</h4><p>{ar?"سلطان أحمد للمعالم التاريخية، غلطة للمشي والإطلالات، نيشانتاشي للتسوق والمقاهي، وكاديكوي للجانب الآسيوي.":"Sultanahmet for landmarks, Galata for walks and views, Nişantaşı for cafés and shopping, Kadıköy for the Asian side."}</p></article>
-          <article><span>03</span><h4>{ar?"الثقافة":"Local etiquette"}</h4><p>{ar?"التحية الودودة مقدّرة. عند زيارة المساجد ارتدِ ملابس محتشمة واتبع تعليمات الدخول والتصوير.":"A warm greeting goes a long way. At mosques, dress respectfully and follow local guidance for entry and photography."}</p></article>
-          <article><span>04</span><h4>{ar?"سبتمبر":"September kit"}</h4><p>{ar?"احضر طبقة خفيفة للمساء، حذاء مريحاً، مظلة صغيرة، وبطارية متنقلة للأيام الطويلة.":"Bring a light evening layer, comfortable shoes, a compact umbrella and a power bank for long days."}</p></article>
-          <article><span>05</span><h4>{ar?"المذاق":"What to try"}</h4><p>{ar?"السميت، القهوة التركية، البقلاوة، السمك الطازج، ووجبة فطور تركية متكاملة.":"Try simit, Turkish coffee, baklava, fresh fish and a full Turkish breakfast."}</p></article>
-          <article><span>06</span><h4>{ar?"كلمات سريعة":"Useful words"}</h4><p>Merhaba · {ar?"مرحباً":"Hello"}<br/>Teşekkürler · {ar?"شكراً":"Thank you"}<br/>Lütfen · {ar?"من فضلك":"Please"}</p></article>
-        </div>
       </div>
       <div className="istanbul-sources"><a href="https://goturkiye.com/istanbul" target="_blank" rel="noreferrer">GoTürkiye ↗</a><a href="https://www.timeanddate.com/time/zone/turkey/istanbul" target="_blank" rel="noreferrer">Time information ↗</a></div>
     </section>

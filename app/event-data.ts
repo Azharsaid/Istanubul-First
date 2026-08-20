@@ -90,14 +90,16 @@ export const scienceAgenda = [
   { time: "13:20–13:30", en: "Questions & Answers", ar: "أسئلة وأجوبة", type: "science" as const },
 ];
 
+const placeImage = (url: string) => `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=1200&h=900&fit=cover&output=webp`;
+
 export const locations = [
-  { en: "Hilton Istanbul Bomonti", ar: "هيلتون إسطنبول بومونتي", kind: "hotel", map: "https://maps.app.goo.gl/yZ25P31eqTD7cbQk9" },
-  { en: "Tavacı Recep Usta", ar: "مطعم Tavacı Recep Usta", kind: "dining", map: "https://maps.app.goo.gl/yssf3M8djU2CH48t9" },
-  { en: "Del Mare", ar: "مطعم Del Mare", kind: "dining", map: "https://maps.app.goo.gl/irDXQVHz5Lg67Gwa8" },
-  { en: "Bozdağ Film Plateau", ar: "استوديوهات بوزداغ", kind: "social", map: "https://maps.app.goo.gl/6UxCsDTW9GDZhnu2A" },
-  { en: "The Market", ar: "مطعم The Market", kind: "dining", map: "https://maps.app.goo.gl/P15JYUvKdCEhUAzS8" },
-  { en: "İstinyePark", ar: "مركز İstinyePark", kind: "social", map: "https://maps.app.goo.gl/AoUdxDuZ1mQZtSjp9" },
-  { en: "Balık Ev Mall Restaurant", ar: "مطعم Balık Ev Mall", kind: "dining", map: "https://maps.app.goo.gl/P9qTFJdx1bZ1sVE2A" },
+  { en: "Hilton Istanbul Bomonti", ar: "هيلتون إسطنبول بومونتي", kind: "hotel", map: "https://maps.app.goo.gl/yZ25P31eqTD7cbQk9", image: placeImage("https://etuder.org.tr/wp-content/uploads/2019/02/hilton-4.jpg") },
+  { en: "Tavacı Recep Usta", ar: "مطعم Tavacı Recep Usta", kind: "dining", map: "https://maps.app.goo.gl/yssf3M8djU2CH48t9", image: placeImage("https://www.torkeya.com/Istanbulasia/Recep_Usta_Nin.jpg") },
+  { en: "Del Mare", ar: "مطعم Del Mare", kind: "dining", map: "https://maps.app.goo.gl/irDXQVHz5Lg67Gwa8", image: placeImage("https://irp.cdn-website.com/82048c5a/dms3rep/multi/Delmare-Rest25.jpg") },
+  { en: "Bozdağ Film Plateau", ar: "استوديوهات بوزداغ", kind: "social", map: "https://maps.app.goo.gl/6UxCsDTW9GDZhnu2A", image: placeImage("https://static.wixstatic.com/media/748dac_cfd8f0a9e9f443648006817f0f08b2af~mv2.jpg") },
+  { en: "The Market", ar: "مطعم The Market", kind: "dining", map: "https://maps.app.goo.gl/P15JYUvKdCEhUAzS8", image: placeImage("https://img.timeturk.com/resim/dresim/2023/DSC01742.jpg") },
+  { en: "İstinyePark", ar: "مركز İstinyePark", kind: "social", map: "https://maps.app.goo.gl/AoUdxDuZ1mQZtSjp9", image: placeImage("https://www.istinyeparkgyo.com.tr/cdn/Delivery/Public/Image/Download/hakkimizda-desktop-slider_ehppd1glhu.jpg") },
+  { en: "Balık Ev Mall Restaurant", ar: "مطعم Balık Ev Mall", kind: "dining", map: "https://maps.app.goo.gl/P9qTFJdx1bZ1sVE2A", image: placeImage("https://mudavim.net/wp-content/uploads/2024/10/istinyepark-balikev-1024x768.jpeg") },
 ];
 
 export const checklist = [
