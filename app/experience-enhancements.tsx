@@ -81,20 +81,22 @@ export function IstanbulSection({ lang }: { lang: Lang }) {
   const [forecast, setForecast] = useState<{dates:string[]; max:number[]; min:number[]; codes:number[]} | null>(null);
   const [currentTemp, setCurrentTemp] = useState<number | null>(null);
   const [rate, setRate] = useState<number | null>(null);
+  const [usdRate, setUsdRate] = useState<number | null>(null);
   const [updated, setUpdated] = useState<string | null>(null);
   const [weatherState, setWeatherState] = useState<"loading"|"live"|"cached"|"offline">("loading");
   const [currencyState, setCurrencyState] = useState<"loading"|"live"|"cached"|"offline">("loading");
-  const [jod, setJod] = useState("1");
+  const [amount, setAmount] = useState("1");
+  const [sourceCurrency, setSourceCurrency] = useState<"JOD" | "USD">("JOD");
   useEffect(() => {
     try {
       const weatherCache = JSON.parse(localStorage.getItem("first-weather-cache") || "null");
       if (weatherCache) { setCurrentTemp(weatherCache.currentTemp); setForecast(weatherCache.forecast); setUpdated(weatherCache.updated); setWeatherState("cached"); }
       const rateCache = JSON.parse(localStorage.getItem("first-rate-cache") || "null");
-      if (rateCache) { setRate(rateCache.rate); setUpdated(x => x || rateCache.updated); setCurrencyState("cached"); }
+      if (rateCache) { setRate(rateCache.rate); setUsdRate(rateCache.usdRate ?? null); setUpdated(x => x || rateCache.updated); setCurrencyState("cached"); }
     } catch { /* optional cache */ }
     fetch("https://api.open-meteo.com/v1/forecast?latitude=41.0082&longitude=28.9784&current=temperature_2m&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=Europe%2FIstanbul&forecast_days=7")
       .then(r=>{if(!r.ok)throw new Error();return r.json()}).then(data=>{const value={dates:data.daily?.time??[],max:data.daily?.temperature_2m_max??[],min:data.daily?.temperature_2m_min??[],codes:data.daily?.weather_code??[]},stamp=new Date().toISOString();setCurrentTemp(data.current?.temperature_2m ?? null);setForecast(value);setUpdated(stamp);setWeatherState("live");localStorage.setItem("first-weather-cache",JSON.stringify({currentTemp:data.current?.temperature_2m??null,forecast:value,updated:stamp}))}).catch(()=>setWeatherState(s=>s==="cached"?s:"offline"));
-    fetch("https://open.er-api.com/v6/latest/JOD").then(r=>{if(!r.ok)throw new Error();return r.json()}).then(data=>{const value=data.rates?.TRY;if(!value)throw new Error();const stamp=new Date().toISOString();setRate(value);setUpdated(x=>x||stamp);setCurrencyState("live");localStorage.setItem("first-rate-cache",JSON.stringify({rate:value,updated:stamp}))}).catch(()=>setCurrencyState(s=>s==="cached"?s:"offline"));
+    fetch("https://open.er-api.com/v6/latest/JOD").then(r=>{if(!r.ok)throw new Error();return r.json()}).then(data=>{const value=data.rates?.TRY,usdValue=data.rates?.USD;if(!value||!usdValue)throw new Error();const usdToTry=value/usdValue,stamp=new Date().toISOString();setRate(value);setUsdRate(usdToTry);setUpdated(x=>x||stamp);setCurrencyState("live");localStorage.setItem("first-rate-cache",JSON.stringify({rate:value,usdRate:usdToTry,updated:stamp}))}).catch(()=>setCurrencyState(s=>s==="cached"?s:"offline"));
   }, []);
   const weatherIcon=(code:number)=>code===0?"☀":code<4?"⛅":code<70?"☂":"❄";
   return (
@@ -123,7 +125,7 @@ export function IstanbulSection({ lang }: { lang: Lang }) {
       </div>
       <div className="istanbul-quick-grid">
         <article><span>⌚</span><small>{ar ? "التوقيت" : "TIME"}</small><b>UTC+3</b><p>{ar ? "نفس توقيت عمّان خلال أيام الرحلة." : "The same as Amman during the event."}</p></article>
-        <article className="live-tile currency-tile"><span>₺</span><small>{ar ? "العملة" : "JOD → TRY"} · {currencyState.toUpperCase()}</small><b>{rate ? `${jod || 0} JOD = ${(Number(jod || 0)*rate).toFixed(2)} TRY` : ar ? "السعر غير متاح" : "Rate unavailable"}</b><input aria-label="Jordanian dinars" inputMode="decimal" value={jod} onChange={e=>setJod(e.target.value.replace(/[^0-9.]/g,""))}/><p>{ar ? "سعر إرشادي؛ قد يختلف سعر البنك." : "Indicative reference rate; your bank’s rate may vary."}</p></article>
+        <article className="live-tile currency-tile"><span>₺</span><small>{ar ? "حوّل إلى الليرة التركية" : "CONVERT TO TRY"} · {currencyState.toUpperCase()}</small><div className="currency-choice" role="group" aria-label={ar?"اختر العملة":"Choose currency"}><button className={sourceCurrency==="JOD"?"active":""} onClick={()=>setSourceCurrency("JOD")}>JOD</button><button className={sourceCurrency==="USD"?"active":""} onClick={()=>setSourceCurrency("USD")}>USD</button></div><b>{(sourceCurrency==="JOD"?rate:usdRate) ? `${amount || 0} ${sourceCurrency} = ${(Number(amount || 0)*(sourceCurrency==="JOD"?rate!:usdRate!)).toFixed(2)} TRY` : ar ? "السعر غير متاح" : "Rate unavailable"}</b><label><span>{sourceCurrency}</span><input aria-label={sourceCurrency==="JOD"?"Jordanian dinars":"US dollars"} inputMode="decimal" value={amount} onChange={e=>setAmount(e.target.value.replace(/[^0-9.]/g,""))}/></label><p>{ar ? "سعر إرشادي؛ قد يختلف سعر البنك." : "Indicative reference rate; your bank’s rate may vary."}</p></article>
         <article className="live-tile"><span>☀</span><small>{ar ? "الطقس" : "WEATHER"} · {weatherState.toUpperCase()}</small><b>{currentTemp!==null ? `${Math.round(currentTemp)}°C` : ar ? "غير متاح" : "Unavailable"}</b><p>{currentTemp!==null ? (currentTemp<15?(ar?"طبقة دافئة خفيفة مناسبة.":"A light warm layer is useful."):currentTemp>27?(ar?"ملابس خفيفة وماء كافٍ.":"Choose light clothing and stay hydrated."):(ar?"طقس معتدل؛ احمل طبقة خفيفة للمساء.":"Mild conditions; carry a light evening layer.")) : (ar?"سيظهر آخر تحديث محفوظ عند توفره.":"The last cached update will appear when available.")}</p></article>
         <article><span>112</span><small>{ar ? "الطوارئ" : "EMERGENCY"}</small><b>24 / 7</b><p>{ar ? "رقم الطوارئ الموحد في تركيا." : "Türkiye’s unified emergency number."}</p></article>
       </div>
