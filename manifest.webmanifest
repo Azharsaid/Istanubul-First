@@ -2,9 +2,15 @@
   "name": "FIRST Istanbul Experience",
   "short_name": "FIRST 2026",
   "description": "Dar Aldawa scientific symposium and Istanbul experience",
-  "start_url": "/Istanubul-First/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#061d2e",
-  "theme_color": "#05a99d",
-  "icons": [{ "src": "/Istanubul-First/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+  "orientation": "portrait-primary",
+  "background_color": "#f5f9f7",
+  "theme_color": "#061d2e",
+  "icons": [
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
+    { "src": "./favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
 }
